@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { StackNavigator } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation';
 import { initializeListeners } from 'react-navigation-redux-helpers';
 
 import LoginScreen from '../components/LoginScreen';
@@ -9,7 +9,7 @@ import MainScreen from '../components/MainScreen';
 import ProfileScreen from '../components/ProfileScreen';
 import { navigationPropConstructor } from '../utils/redux';
 
-export const AppNavigator = StackNavigator({
+export const AppNavigator = createStackNavigator({
   Login: { screen: LoginScreen },
   Main: { screen: MainScreen },
   Profile: { screen: ProfileScreen },
@@ -27,8 +27,13 @@ class AppWithNavigationState extends React.Component {
 
   render() {
     const { dispatch, nav } = this.props;
-    const navigation = navigationPropConstructor(dispatch, nav);
-    return <AppNavigator navigation={navigation} />;
+    this._navigation = navigationPropConstructor(
+      dispatch,
+      nav,
+      AppNavigator.router,
+      () => this._navigation
+    );
+    return <AppNavigator navigation={this._navigation} />;
   }
 }
 

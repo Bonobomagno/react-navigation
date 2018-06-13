@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import clamp from 'clamp';
 import {
@@ -118,16 +118,20 @@ class StackViewLayout extends React.Component {
       ...passProps
     } = this.props;
 
-    return renderHeader({
-      ...passProps,
-      ...transitionProps,
-      scene,
-      mode: headerMode,
-      transitionPreset: this._getHeaderTransitionPreset(),
-      leftInterpolator: headerLeftInterpolator,
-      titleInterpolator: headerTitleInterpolator,
-      rightInterpolator: headerRightInterpolator,
-    });
+    return (
+      <NavigationProvider value={scene.descriptor.navigation}>
+        {renderHeader({
+          ...passProps,
+          ...transitionProps,
+          scene,
+          mode: headerMode,
+          transitionPreset: this._getHeaderTransitionPreset(),
+          leftInterpolator: headerLeftInterpolator,
+          titleInterpolator: headerTitleInterpolator,
+          rightInterpolator: headerRightInterpolator,
+        })}
+      </NavigationProvider>
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -211,6 +215,8 @@ class StackViewLayout extends React.Component {
 
   _panResponder = PanResponder.create({
     onPanResponderTerminate: () => {
+      const { navigation } = this.props.transitionProps;
+      const { index } = navigation.state;
       this._isResponding = false;
       this._reset(index, 0);
       this.props.onGestureCanceled && this.props.onGestureCanceled();
@@ -394,11 +400,7 @@ class StackViewLayout extends React.Component {
     const headerMode = this._getHeaderMode();
     if (headerMode === 'float') {
       const { scene } = this.props.transitionProps;
-      floatingHeader = (
-        <NavigationProvider value={scene.descriptor.navigation}>
-          {this._renderHeader(scene, headerMode)}
-        </NavigationProvider>
-      );
+      floatingHeader = this._renderHeader(scene, headerMode);
     }
     const {
       transitionProps: { navigation, position, layout, scene, scenes },
